@@ -7,6 +7,12 @@
  */
 namespace app;
 
+function autoload(){
+    require('WebServer.php');
+}
+
+spl_autoload_register('autoload');
+
 $requests = [
     [1, 'http://www.sina.com'],
     [2, 'http://www.sina.com'],
