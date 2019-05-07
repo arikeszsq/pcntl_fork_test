@@ -5,6 +5,7 @@
  * Date: 2019/5/7
  * Time: 16:37
  */
+namespace  app;
 
 class WebServer
 {

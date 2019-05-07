@@ -5,6 +5,7 @@
  * Date: 2019/5/7
  * Time: 16:43
  */
+namespace app;
 
 $requests = [
     [1, 'http://www.sina.com'],
