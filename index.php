@@ -18,16 +18,17 @@ $requests = [
     [6, 'http://www.sina.com']
 ];
 
-echo "多进程测试：" . PHP_EOL;
+echo "多进程请求六次新浪网测试：" . PHP_EOL;
 $server = new WebServer();
 $server->master($requests);
 
 
-echo PHP_EOL . "单进程测试：" . PHP_EOL;
+echo PHP_EOL . "单进程请求六次新浪网测试：" . PHP_EOL;
 $start = microtime(true);
 for ($i = 0; $i < 6; $i++) {
-    $c = file_get_contents("http://www.sina.com");
+    file_get_contents("http://www.sina.com");
 }
 $end = microtime(true);
 $cost = $end - $start;
-echo "All request handle stop at " . $end . "\t cost:" . $cost . PHP_EOL;
+
+echo "花费时间 " . $cost .'秒';

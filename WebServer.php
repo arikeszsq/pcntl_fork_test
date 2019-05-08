@@ -16,34 +16,10 @@ class WebServer
         $this->list = [];
     }
 
-    public function worker($request)
-    {
-        $pid = pcntl_fork();
-        if ($pid == -1) {
-            return false;
-        }
-        if ($pid > 0) {
-            return $pid;
-        }
-        if ($pid == 0) {
-            $time = $request[0];
-            $method = $request[1];
-            $start = microtime(true);
-            echo getmypid() . "\t start " . $method . "\tat" . $start . PHP_EOL;
-//sleep($time);
-            $c = file_get_contents($method);
-            echo getmypid() . "\n";
-            $end = microtime(true);
-            $cost = $end - $start;
-            echo getmypid() . "\t stop \t" . $method . "\tat:" . $end . "\tcost:" . $cost . PHP_EOL;
-            exit(0);
-        }
-    }
-
     public function master($requests)
     {
         $start = microtime(true);
-        echo "All request handle start at " . $start . PHP_EOL;
+        echo "处理开始时间： " . $start . PHP_EOL;
         foreach ($requests as $request) {
             $pid = $this->worker($request);
             if (!$pid) {
@@ -54,6 +30,11 @@ class WebServer
         }
         while (count($this->list) > 0) {
             foreach ($this->list as $k => $pid) {
+                // pcntl_waitpid ( int $pid , int &$status [, int $options = 0 ] ) : int — 等待或返回fork的子进程状态
+                //< -1	等待任意进程组ID等于参数pid给定值的绝对值的进程。
+                //-1	等待任意子进程;与pcntl_wait函数行为一致。
+                //0	等待任意与调用进程组ID相同的子进程。
+                //> 0	等待进程号等于参数pid值的子进程。
                 $res = pcntl_waitpid($pid, $status, WNOHANG);
                 if ($res == -1 || $res > 0) {
                     unset($this->list[$k]);
@@ -63,6 +44,34 @@ class WebServer
         }
         $end = microtime(true);
         $cost = $end - $start;
-        echo "All request handle stop at " . $end . "\t cost:" . $cost . PHP_EOL;
+        echo '所有请求花费时间：'. $cost . '秒'.PHP_EOL;
+    }
+
+    public function worker($request)
+    {
+        //创建一个子进程，这个子进程仅PID（进程号） 和PPID（父进程号）与其父进程不同
+        //父进程和子进程 都从fork的位置开始向下继续执行
+        $pid = pcntl_fork();
+
+        //创建子进程失败时返回-1.
+        if ($pid == -1) {
+            return false;
+        }
+
+        //父进程执行过程中，得到的fork返回值为子进程号,所以$pid>0，这里是父进程
+        if ($pid > 0) {
+            return $pid;
+        }
+
+        //子进程得到的是0, 所以这里是子进程执行的逻辑。
+        if ($pid == 0) {
+            $method = $request[1];
+            $start = microtime(true);
+            file_get_contents($method);
+            $end = microtime(true);
+            $cost = $end - $start;
+            echo '本次花费时间：' . $cost . PHP_EOL;
+            exit(0);
+        }
     }
 }
